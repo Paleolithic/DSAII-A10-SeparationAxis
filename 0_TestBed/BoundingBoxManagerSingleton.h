@@ -55,6 +55,11 @@ public:
 	*/
 	void CalculateCollision(void);
 
+	/*
+	Calculate Separation Axis
+	*/
+	int BoundingBoxManagerSingleton::testOBB(BoundingBoxClass* a, BoundingBoxClass* b, int i, int j);
+
 private:
 	/* Constructor */
 	BoundingBoxManagerSingleton(void);

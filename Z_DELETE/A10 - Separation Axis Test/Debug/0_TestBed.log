@@ -1,0 +1,27 @@
+﻿Build started 4/15/2015 1:46:51 PM.
+     1>Project "D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\0_TestBed\0_TestBed.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /Od /Oy- /D DEBUG /D _MBCS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\\" /Fd"D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\vc110.pdb" /Gd /TP /wd4251 /analyze- /errorReport:prompt /D _CRT_SECURE_NO_WARNINGS Application.cpp ApplicationClass.cpp ApplicationControls.cpp BoundingBoxManagerSingleton.cpp Main.cpp
+         BoundingBoxManagerSingleton.cpp
+         Generating Code...
+         Skipping... (no relevant changes detected)
+         Main.cpp
+         ApplicationControls.cpp
+         ApplicationClass.cpp
+         Application.cpp
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\8.0\bin\x86\rc.exe /D _UNICODE /D UNICODE /l"0x0409" /nologo /fo"D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\BTO.res" ..\res\BTO.rc 
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis TestD.exe" /INCREMENTAL /NOLOGO glew32.lib SOIL.lib opengl32.lib glu32.lib "sfml-system.lib" "sfml-window.lib" MyEngine_d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis TestD.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis TestD.lib" /MACHINE:X86 "D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\BTO.res"
+         "D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\Application.obj"
+         "D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\ApplicationClass.obj"
+         "D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\ApplicationControls.obj"
+         "D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\BoundingBoxClass.obj"
+         "D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\BoundingBoxManagerSingleton.obj"
+         "D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\Z_DELETE\A10 - Separation Axis Test\Debug\Main.obj"
+     1>LINK : fatal error LNK1104: cannot open file 'glew32.lib'
+     1>Done Building Project "D:\Users\tjb2597\Documents\DSAII-A10-SeparationAxis\0_TestBed\0_TestBed.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:02.82
