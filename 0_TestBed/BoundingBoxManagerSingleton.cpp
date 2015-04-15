@@ -161,9 +161,28 @@ void BoundingBoxManagerSingleton::CalculateCollision(void)
 				m_lColor[i] = m_lColor[j] = MERED; //We make the Boxes red
 
 
-			vector3 c;      // OBB center point
-			vector3 u[3];  // Local x-, y-, and z-axes
-			vector3 e;     // Positive halfwidth extents of OBB along each axis
+			vector3 v1c = m_lBox[i]->GetCentroid();      // OBB center point
+			vector3 v2c = m_lBox[j]->GetCentroid();      // OBB center point
+			
+			vector3 u1[3];  // Local x-, y-, and z-axes
+			u1[0] = static_cast<vector3>(m_lMatrix[i] * static_cast<MyEngine::matrix4>(glm::translate(1,0,0)));
+			u1[1] = static_cast<vector3>(m_lMatrix[i] * static_cast<MyEngine::matrix4>(glm::translate(0,1,0)));
+			u1[2] = static_cast<vector3>(m_lMatrix[i] * static_cast<MyEngine::matrix4>(glm::translate(0,0,1)));
+
+			vector3 u2[3];  // Local x-, y-, and z-axes
+			u2[0] = static_cast<vector3>(m_lMatrix[j] * static_cast<MyEngine::matrix4>(glm::translate(1,0,0)));
+			u2[1] = static_cast<vector3>(m_lMatrix[j] * static_cast<MyEngine::matrix4>(glm::translate(0,1,0)));
+			u2[2] = static_cast<vector3>(m_lMatrix[j] * static_cast<MyEngine::matrix4>(glm::translate(0,0,1)));
+
+			float e1[3];     // Positive halfwidth extents of OBB along each axis
+			e1[0] = glm::abs(v1Min.x) > glm::abs(v1Max.x) ? v1Min.x : v1Max.x;
+			e1[1] = glm::abs(v1Min.x) > glm::abs(v1Max.x) ? v1Min.y : v1Max.y;
+			e1[2] = glm::abs(v1Min.x) > glm::abs(v1Max.x) ? v1Min.z : v1Max.z;
+			
+			float e2[3];
+			e2[0] = glm::abs(v2Min.x) > glm::abs(v2Max.x) ? v2Min.x : v2Max.x;
+			e2[1] = glm::abs(v2Min.x) > glm::abs(v2Max.x) ? v2Min.y : v2Max.y;
+			e2[2] = glm::abs(v2Min.x) > glm::abs(v2Max.x) ? v2Min.z : v2Max.z;
 
 			// ra = obj1 distance between center and plane edge
 			// rb = obj2 distance between center and plane edge 
@@ -173,85 +192,80 @@ void BoundingBoxManagerSingleton::CalculateCollision(void)
 			// Compute rotation matrix expressing b in a's coordinate frame
 			for (int x = 0; x < 3; x++)
 				for (int y = 0; y < 3; y++)
-					R[x][y] = glm::dot(v1Max.u[y], static_cast<vector3>m_lBox[j].u[y]);
+					R[i][j] = glm::dot(u1[i], u2[j]);
 
 			// Compute translation vector t
-			vector3 t = b.c - a.c;
+			vector3 t = v2c - v1c;
 			// Bring translation into a's coordinate frame
-			t = vector3(glm::dot(t, a.u[0]), glm::dot(t, a.u[2]), glm::dot(t, a.u[2]));
+			t = vector3(glm::dot(t, u1[0]), glm::dot(t, u1[2]), glm::dot(t, u1[2]));
 
 			// Compute common subexpressions. Add in an epsilon term to
 			// counteract arithmetic errors when two edges are parallel and
 			// their cross product is (near) null (see text for details)
+
 			for (int i = 0; i < 3; i++)
 				for (int j = 0; j < 3; j++)
-					AbsR[i][j] = glm::abs(R[i][j]) + glm::epsilon;
+					AbsR[i][j] = glm::abs(R[i][j]); /*+ glm::epsilon()*/
 
 			// Test axes L = A0, L = A1, L = A2
 			for (int i = 0; i < 3; i++) {
-				ra = a.e[i];
-				rb = b.e[0] * AbsR[i][0] + b.e[1] * AbsR[i][1] + b.e[2] * AbsR[i][2];
+				ra = e1[i];
+				rb = e2[0] * AbsR[i][0] + e2[1] * AbsR[i][1] + e2[2] * AbsR[i][2];
 				if (glm::abs(t[i]) > ra + rb) bColliding = false;
 			}
 
 			// Test axes L = B0, L = B1, L = B2
 			for (int i = 0; i < 3; i++) {
-				ra = a.e[0] * AbsR[0][i] + a.e[1] * AbsR[1][i] + a.e[2] * AbsR[2][i];
-				rb = b.e[i];
+				ra = e1[0] * AbsR[0][i] + e1[1] * AbsR[1][i] + e1[2] * AbsR[2][i];
+				rb = e1[i];
 				if (glm::abs(t[0] * R[0][i] + t[1] * R[1][i] + t[2] * R[2][i]) > ra + rb) bColliding = false;
 			}
 
 			// Test axis L = A0 x B0
-			ra = a.e[1] * AbsR[2][0] + a.e[2] * AbsR[1][0];
-			rb = b.e[1] * AbsR[0][2] + b.e[2] * AbsR[0][1];
+			ra = e1[1] * AbsR[2][0] + e1[2] * AbsR[1][0];
+			rb = e2[1] * AbsR[0][2] + e2[2] * AbsR[0][1];
 			if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb) bColliding = false;
 
 			// Test axis L = A0 x B1
-			ra = a.e[1] * AbsR[2][1] + a.e[2] * AbsR[1][1];
-			rb = b.e[0] * AbsR[0][2] + b.e[2] * AbsR[0][0];
+			ra = e1[1] * AbsR[2][1] + e1[2] * AbsR[1][1];
+			rb = e2[0] * AbsR[0][2] + e2[2] * AbsR[0][0];
 			if (glm::abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb) bColliding = false;
 
 			// Test axis L = A0 x B2
-			ra = a.e[1] * AbsR[2][2] + a.e[2] * AbsR[1][2];
-			rb = b.e[0] * AbsR[0][1] + b.e[1] * AbsR[0][0];
+			ra = e1[1] * AbsR[2][2] + e1[2] * AbsR[1][2];
+			rb = e2[0] * AbsR[0][1] + e2[1] * AbsR[0][0];
 			if (glm::abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb) bColliding = false;
 
 			// Test axis L = A1 x B0
-			ra = a.e[0] * AbsR[2][0] + a.e[2] * AbsR[0][0];
-			rb = b.e[1] * AbsR[1][2] + b.e[2] * AbsR[1][1];
+			ra = e1[0] * AbsR[2][0] + e1[2] * AbsR[0][0];
+			rb = e2[1] * AbsR[1][2] + e2[2] * AbsR[1][1];
 
 			if (glm::abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb) bColliding = false;
 
 			// Test axis L = A1 x B1
-			ra = a.e[0] * AbsR[2][1] + a.e[2] * AbsR[0][1];
-			rb = b.e[0] * AbsR[1][2] + b.e[2] * AbsR[1][0];
+			ra = e1[0] * AbsR[2][1] + e1[2] * AbsR[0][1];
+			rb = e2[0] * AbsR[1][2] + e2[2] * AbsR[1][0];
 			if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb) bColliding = false;
 
 			// Test axis L = A1 x B2
-			ra = a.e[0] * AbsR[2][2] + a.e[2] * AbsR[0][2];
-			rb = b.e[0] * AbsR[1][1] + b.e[1] * AbsR[1][0];
+			ra = e1[0] * AbsR[2][2] + e1[2] * AbsR[0][2];
+			rb = e2[0] * AbsR[1][1] + e2[1] * AbsR[1][0];
 			if (glm::abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb) bColliding = false;
 
 			// Test axis L = A2 x B0
-			ra = a.e[0] * AbsR[1][0] + a.e[1] * AbsR[0][0];
-			rb = b.e[1] * AbsR[2][2] + b.e[2] * AbsR[2][1];
+			ra = e1[0] * AbsR[1][0] + e1[1] * AbsR[0][0];
+			rb = e2[1] * AbsR[2][2] + e2[2] * AbsR[2][1];
 			if (glm::abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb) bColliding = false;
 
 			// Test axis L = A2 x B1
-			ra = a.e[0] * AbsR[1][1] + a.e[1] * AbsR[0][1];
-			rb = b.e[0] * AbsR[2][2] + b.e[2] * AbsR[2][0];
+			ra = e1[0] * AbsR[1][1] + e1[1] * AbsR[0][1];
+			rb = e2[0] * AbsR[2][2] + e2[2] * AbsR[2][0];
 			if (glm::abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb) bColliding = false;
 
 			// Test axis L = A2 x B2
-			ra = a.e[0] * AbsR[1][2] + a.e[1] * AbsR[0][2];
-			rb = b.e[0] * AbsR[2][1] + b.e[1] * AbsR[2][0];
+			ra = e1[0] * AbsR[1][2] + e1[1] * AbsR[0][2];
+			rb = e2[0] * AbsR[2][1] + e2[1] * AbsR[2][0];
 			if (glm::abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb) bColliding = false;
 		}
 	}
-
-
-	
-
-	// Since no separating axis is found, the OBBs must be intersecting
-	return 1;
 }
