@@ -157,15 +157,10 @@ void BoundingBoxManagerSingleton::CalculateCollision(void)
 			else if(v1Max.z < v2Min.z || v1Min.z > v2Max.z)
 				bColliding = false;
 
-			int test = testOBB(i, j);
-			if(test == 0){
-				bColliding = false;
-			}
-
 			if(bColliding)
 				m_lColor[i] = m_lColor[j] = MERED; //We make the Boxes red
 
-			
+			int test = testOBB(i, j);
 			std::cout << test << std::endl;
 			
 		}
@@ -173,8 +168,8 @@ void BoundingBoxManagerSingleton::CalculateCollision(void)
 }
 
 int BoundingBoxManagerSingleton::testOBB(int i, int j){
-	vector3 v1c = static_cast<vector3>(m_lMatrix[i] * vector4(m_lBox[i]->GetCentroid(), 1.0f));    // OBB center point
-	vector3 v2c = static_cast<vector3>(m_lMatrix[j] * vector4(m_lBox[j]->GetCentroid(), 1.0f));      // OBB center point
+	vector3 v1c = m_lBox[i]->GetCentroid();      // OBB center point
+	vector3 v2c = m_lBox[j]->GetCentroid();      // OBB center point
 			
 	vector3 u1[3];  // Local x-, y-, and z-axes
 	u1[0] = static_cast<vector3>(m_lMatrix[i] * vector4(1,0,0,0));
@@ -186,8 +181,15 @@ int BoundingBoxManagerSingleton::testOBB(int i, int j){
 	u2[1] = static_cast<vector3>(m_lMatrix[j] * vector4(0,1,0,0));
 	u2[2] = static_cast<vector3>(m_lMatrix[j] * vector4(0,0,1,0));
 
-	vector3 e1 = m_lBox[i]->GetSize() / 2.0f; // Positive halfwidth extents of OBB along each axis
-	vector3 e2 = m_lBox[j]->GetSize() / 2.0f;
+	float e1[3];     // Positive halfwidth extents of OBB along each axis
+	e1[0] = m_lBox[i]->GetSize().x;
+	e1[1] = m_lBox[i]->GetSize().y;
+	e1[2] = m_lBox[i]->GetSize().z;
+			
+	float e2[3];
+	e2[0] = m_lBox[j]->GetSize().x;
+	e2[1] = m_lBox[j]->GetSize().y;
+	e2[2] = m_lBox[j]->GetSize().z;
 
 	// ra = obj1 distance between center and plane edge
 	// rb = obj2 distance between center and plane edge 
@@ -215,60 +217,60 @@ int BoundingBoxManagerSingleton::testOBB(int i, int j){
 	// Test axes L = A0, L = A1, L = A2
 	for (int x = 0; x < 3; x++) {
 		ra = e1[x];
-		rb = e2.x * AbsR[x][0] + e2.y * AbsR[x][1] + e2.z * AbsR[x][2];
+		rb = e2[0] * AbsR[x][0] + e2[1] * AbsR[x][1] + e2[2] * AbsR[x][2];
 		if (glm::abs(t[x]) > ra + rb) return 0;
 	}
 
 	// Test axes L = B0, L = B1, L = B2
 	for (int x = 0; x < 3; x++) {
-		ra = e1.x * AbsR[0][x] + e1.y * AbsR[1][x] + e1.z * AbsR[2][x];
+		ra = e1[0] * AbsR[0][x] + e1[1] * AbsR[1][x] + e1[2] * AbsR[2][x];
 		rb = e2[x];
 		if (glm::abs(t[0] * R[0][x] + t[1] * R[1][x] + t[2] * R[2][x]) > ra + rb) return 0;
 	}
 
 	// Test axis L = A0 x B0
-	ra = e1.y * AbsR[2][0] + e1.z * AbsR[1][0];
-	rb = e2.y * AbsR[0][2] + e2.z * AbsR[0][1];
+	ra = e1[1] * AbsR[2][0] + e1[2] * AbsR[1][0];
+	rb = e2[1] * AbsR[0][2] + e2[2] * AbsR[0][1];
 	if (glm::abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb) return 0;
 
 	// Test axis L = A0 x B1
-	ra = e1.y * AbsR[2][1] + e1.z * AbsR[1][1];
-	rb = e2.x * AbsR[0][2] + e2.z * AbsR[0][0];
+	ra = e1[1] * AbsR[2][1] + e1[2] * AbsR[1][1];
+	rb = e2[0] * AbsR[0][2] + e2[2] * AbsR[0][0];
 	if (glm::abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb) return 0;
 
 	// Test axis L = A0 x B2
-	ra = e1.y * AbsR[2][2] + e1.z * AbsR[1][2];
-	rb = e2.x * AbsR[0][1] + e2.y * AbsR[0][0];
+	ra = e1[1] * AbsR[2][2] + e1[2] * AbsR[1][2];
+	rb = e2[0] * AbsR[0][1] + e2[1] * AbsR[0][0];
 	if (glm::abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb) return 0;
 
 	// Test axis L = A1 x B0
-	ra = e1.x * AbsR[2][0] + e1.z * AbsR[0][0];
-	rb = e2.y * AbsR[1][2] + e2.z * AbsR[1][1];
+	ra = e1[0] * AbsR[2][0] + e1[2] * AbsR[0][0];
+	rb = e2[1] * AbsR[1][2] + e2[2] * AbsR[1][1];
 	if (glm::abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb) return 0;
 
 	// Test axis L = A1 x B1
-	ra = e1.x * AbsR[2][1] + e1.z * AbsR[0][1];
-	rb = e2.x * AbsR[1][2] + e2.z * AbsR[1][0];
+	ra = e1[0] * AbsR[2][1] + e1[2] * AbsR[0][1];
+	rb = e2[0] * AbsR[1][2] + e2[2] * AbsR[1][0];
 	if (glm::abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb) return 0;
 
 	// Test axis L = A1 x B2
-	ra = e1.x * AbsR[2][2] + e1.z * AbsR[0][2];
-	rb = e2.x * AbsR[1][1] + e2.y * AbsR[1][0];
+	ra = e1[0] * AbsR[2][2] + e1[2] * AbsR[0][2];
+	rb = e2[0] * AbsR[1][1] + e2[1] * AbsR[1][0];
 	if (glm::abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb) return 0;
 	
 	// Test axis L = A2 x B0
-	ra = e1.x * AbsR[1][0] + e1.y * AbsR[0][0];
-	rb = e2.y * AbsR[2][2] + e2.z * AbsR[2][1];
+	ra = e1[0] * AbsR[1][0] + e1[1] * AbsR[0][0];
+	rb = e2[1] * AbsR[2][2] + e2[2] * AbsR[2][1];
 	if (glm::abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb) return 0;
 
 	// Test axis L = A2 x B1
-	ra = e1.x * AbsR[1][1] + e1.y * AbsR[0][1];
-	rb = e2.x * AbsR[2][2] + e2.z * AbsR[2][0];
+	ra = e1[0] * AbsR[1][1] + e1[1] * AbsR[0][1];
+	rb = e2[0] * AbsR[2][2] + e2[2] * AbsR[2][0];
 	if (glm::abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb) return 0;
 	
 	// Test axis L = A2 x B2
-	ra = e1.x * AbsR[1][2] + e1.y * AbsR[0][2];
-	rb = e2.x * AbsR[2][1] + e2.y * AbsR[2][0];
+	ra = e1[0] * AbsR[1][2] + e1[1] * AbsR[0][2];
+	rb = e2[0] * AbsR[2][1] + e2[1] * AbsR[2][0];
 	if (glm::abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb) return 0;
 
 	return 1;
